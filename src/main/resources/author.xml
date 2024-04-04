@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<author>
+    <student attributeName = "Студент">
+        <name>Андрій</name>
+        <lastname>Чередниченко</lastname>
+        <parentname>Юрійович</parentname>
+    </student>
+    <group attributeName = "Група">125M-23-2</group>
+    <subject attributeName = "Предмет">МПАКС</subject>
+</author>
