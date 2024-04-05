@@ -15,6 +15,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.nio.file.*;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Getter
@@ -95,11 +96,14 @@ public class Tree extends JTree {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                PathCell cell = (PathCell) ((DefaultMutableTreeNode) getSelectionPath().getLastPathComponent()).getUserObject();
-                if(cell.getType() == TypeCell.FILE) {
-                    lastLocation = cell.getFullPath().getParent();
-                } else {
-                    lastLocation = cell.getFullPath();
+                Optional<TreePath> treePath = Optional.ofNullable(getSelectionPath());
+                if (treePath.isPresent()){
+                    PathCell cell = (PathCell) ((DefaultMutableTreeNode) treePath.get().getLastPathComponent()).getUserObject();
+                    if (cell.getType() == TypeCell.FILE) {
+                        lastLocation = cell.getFullPath().getParent();
+                    } else {
+                        lastLocation = cell.getFullPath();
+                    }
                 }
             }
         });
@@ -123,7 +127,7 @@ public class Tree extends JTree {
           public void treeWillCollapse(TreeExpansionEvent event) throws ExpandVetoException {
               TreePath source = (TreePath) event.getPath();
               DefaultMutableTreeNode node = (DefaultMutableTreeNode) source.getLastPathComponent();
-              if(!isEmptyFolder(node)) setNull(node);
+//              if(!isEmptyFolder(node)) setNull(node);
           }
       });
     }

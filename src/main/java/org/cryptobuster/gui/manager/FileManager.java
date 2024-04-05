@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -395,11 +396,11 @@ public class FileManager {
         while(!isAllMatch(paths)){
             paths = paths.stream().map(Path::getParent).toList();
         }
-        return paths.getFirst();
+        return paths.get(0);
     }
 
     private static boolean isAllMatch(List<Path> paths) {
-        return paths.stream().allMatch(path -> paths.getFirst().toString().equals(path.toString()));
+        return paths.stream().allMatch(path -> paths.get(0).toString().equals(path.toString()));
     }
 
 
@@ -428,13 +429,17 @@ public class FileManager {
     }
 
     private void setRootPath(Path path) {
-        if(!Files.isDirectory(path)) path = path.getParent();
-        this.rootPath = path;
-        this.filePanel.getTextField().setText(path.toString());
         try {
-            this.filePanel.getTree().setRootPath(path);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+            if (!Files.isDirectory(path)) path = path.getParent();
+            this.rootPath = path;
+            this.filePanel.getTextField().setText(path.toString());
+            try {
+                this.filePanel.getTree().setRootPath(path);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } catch (NullPointerException e){
+
         }
     }
 

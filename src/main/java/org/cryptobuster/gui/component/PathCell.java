@@ -29,7 +29,7 @@ public class PathCell {
     public String toString() {
         if(this.type == TypeCell.EMPTY) return "EMPTY";
         if(this.type == TypeCell.DENIED) return "DENIED";
-        if(this.fullPath.toString().equals("/")) return "/";
+        if(this.fullPath.toString().equals(this.fullPath.getRoot().toString())) return this.fullPath.getRoot().toString();
         return this.fullPath.getFileName().toString();
     }
 }

@@ -36,6 +36,7 @@ public class FileManagementPanel extends JPanel {
     private void SplitFileAndTab() {
         Split splitPane = new Split(JSplitPane.HORIZONTAL_SPLIT, filePanel, tabEditorPanel);
         splitPane.setResizeWeight(0.1d);
+        splitPane.setDividerLocation(210);
         add(splitPane);
     }
     
