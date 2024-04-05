@@ -31,13 +31,15 @@ public class TabEditorPanel extends JPanel {
         init();
     }
 
-        public void add(Path path, String string){
+    public void add(Path path, String string){
 
         if(this.tabbedEditors.tabIsNull()) setTabbedEditors();
 
         this.tabbedEditors.add(path, string);
 
         int index = this.tabbedEditors.indexOfPath(path);
+
+        this.tabbedEditors.setSelectedIndex(index);
 
         this.getTabbedEditors().addChangeListener(new ChangeListener() {
             @Override

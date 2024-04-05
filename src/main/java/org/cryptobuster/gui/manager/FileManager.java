@@ -24,7 +24,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -182,7 +181,7 @@ public class FileManager {
             public void actionPerformed(ActionEvent e) {
             try {
                 if(Files.notExists(path)) Files.createFile(editor.getPath());
-                Files.writeString(editor.getPath(), editor.getTextArea().getText(), encoder);
+                Files.writeString(editor.getPath(), editor.getInputTextArea().getText(), encoder);
                 log.toLog(SAVE, "successfully saved the " + path.getFileName().toString() + " file", editor.getPath().toString());
             } catch (IOException ex) {
                 log.toLog(ERROR_SAVING_FILE, "possible the problem is include with permission", editor.getPath().toString());
@@ -194,12 +193,12 @@ public class FileManager {
     public void saveAs(){
         JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView());
         fileChooser.setCurrentDirectory(this.filePanel.getTree().getLastLocation().toFile());
-        fileChooser.setFileFilter(setFilter("txt", "txt files (*.txt)"));
+        fileChooser.setSelectedFile(new File(this.filePanel.getTree().getSelectionPath().getLastPathComponent().toString()));
         if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION){
             Path path = getPath(fileChooser);
             try {
                 if(Files.notExists(path)) Files.createFile(path);
-                Files.writeString(path, this.tabEditorPanel.getTabbedEditors().getSelectedEditor().getTextArea().getText());
+                Files.writeString(path, this.tabEditorPanel.getTabbedEditors().getSelectedEditor().getInputTextArea().getText());
                 setRootPath(path.getParent());
                 this.log.toLog(SAVE_AS, fileChooser.getSelectedFile().getName(), path.toString());
             } catch (IOException e) {
@@ -218,7 +217,7 @@ public class FileManager {
             Path path = getPath(fileChooser);
             try {
                 if(Files.notExists(path)) Files.createFile(path);
-                Files.writeString(path, this.tabEditorPanel.getTabbedEditors().getSelectedEditor().getResult().getText());
+                Files.writeString(path, this.tabEditorPanel.getTabbedEditors().getSelectedEditor().getOutputTextArea().getText());
                 setRootPath(path.getParent());
                 this.log.toLog(SAVE_AS, fileChooser.getSelectedFile().getName(), path.toString());
             } catch (IOException e) {
@@ -342,12 +341,8 @@ public class FileManager {
             @Override
             public void mouseClicked(MouseEvent e) {
                 Tree tree = filePanel.getTree();
-                if (e.getClickCount() == 2) {
-                    selectFile(e, tree);
-                }
-                if (e.getClickCount() == 3) {
-                    selectPath(e, tree);
-                }
+                if (e.getClickCount() == 2 && SwingUtilities.isLeftMouseButton(e)) selectFile(e, tree);
+                if(SwingUtilities.isRightMouseButton(e)) selectPath(e, tree);
             }
         });
     }
@@ -374,7 +369,8 @@ public class FileManager {
                 try {
                     createTab(cell.getFullPath());
                 } catch (MalformedInputException ex) {
-                    this.log.toLog(ERROR_ENCODER_READ, "file extension is not supported", "");
+                  throw new RuntimeException(ex);
+//                    this.log.toLog(ERROR_ENCODER_READ, "file extension is not supported", "");
                 } catch (IOException ex) {
                     log.toLog(ERROR_OPENING_FILE, "possible the problem is include with permission or encoder", cell.getFullPath().toString());
                 }
@@ -425,7 +421,6 @@ public class FileManager {
 
     private void createTab(Path path) throws IOException {
         this.tabEditorPanel.add(path, Files.readString(path, encoder));
-
     }
 
     private void setRootPath(Path path) {
@@ -469,24 +464,25 @@ public class FileManager {
             @Override
             public void stateChanged(ChangeEvent e) {
                 if(!tabbedEditors.tabIsNull()){
-                    setCharsInformation(tabbedEditors.getSelectedEditor().getCharsSize());
-                    addListenerEditor(tabbedEditors.getSelectedEditor());
+                    Editor editor = tabbedEditors.getSelectedEditor();
+                    setCharsInformation(editor.getInputCharsSize(), editor.getOutputCharsSize());
+                    addListenerEditor(editor);
                 }
             }
         });
     }
 
     private void addListenerEditor(Editor editor){
-        editor.getTextArea().addKeyListener(new KeyAdapter() {
+        editor.getInputTextArea().addKeyListener(new KeyAdapter() {
             @Override
             public void keyReleased(KeyEvent e) {
-                setCharsInformation(editor.getCharsSize());
+                setCharsInformation(editor.getInputCharsSize(), editor.getOutputCharsSize());
             }
         });
     }
 
-    private void setCharsInformation(long chars){
-        this.information.setCharsInfo(chars);
+    private void setCharsInformation(long inputChars, long outputChars){
+        this.information.setCharsInfo(inputChars, outputChars);
     }
 
 }

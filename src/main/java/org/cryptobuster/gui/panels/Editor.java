@@ -12,8 +12,8 @@ public class Editor extends JPanel{
     private static final String EDITOR_STR = "INPUT";
     private static final String RESULT_STR = "OUTPUT";
 
-    private JTextArea textArea;
-    private JTextArea result;
+    private JTextArea inputTextArea;
+    private JTextArea outputTextArea;
 
     private Path path;
 
@@ -23,21 +23,25 @@ public class Editor extends JPanel{
     }
 
 
-    public long getCharsSize(){
-        return this.textArea.getText().chars().count();
+    public long getInputCharsSize(){
+        return this.inputTextArea.getText().chars().count();
+    }
+
+    public long getOutputCharsSize(){
+        return this.outputTextArea.getText().chars().count();
     }
 
     public long getCharsSizeFromSelectedEditor(){
-        return this.textArea.getText().chars().count();
+        return this.inputTextArea.getText().chars().count();
     }
 
     private void init() {
-        this.textArea = new JTextArea();
-        this.result = new JTextArea();
-        this.result.setEditable(false);
+        this.inputTextArea = new JTextArea();
+        this.outputTextArea = new JTextArea();
+        this.outputTextArea.setEditable(false);
 
 
-        Split splitPane = new Split(JSplitPane.VERTICAL_SPLIT, setPane(this.textArea, EDITOR_STR), setPane(this.result, RESULT_STR));
+        Split splitPane = new Split(JSplitPane.VERTICAL_SPLIT, setPane(this.inputTextArea, EDITOR_STR), setPane(this.outputTextArea, RESULT_STR));
         splitPane.setResizeWeight(0.5d);
 
         setLayout(new BorderLayout());

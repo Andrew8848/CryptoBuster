@@ -73,7 +73,7 @@ public class CryptManager {
             @Override
             public void actionPerformed(ActionEvent e) {
                 crypto = new Caesar();
-                informationPanel.setCipherName("Caesar");
+                informationPanel.setCryptoSystemName("Caesar");
             }
         }));
         menu.addSeparator();
@@ -81,7 +81,7 @@ public class CryptManager {
             @Override
             public void actionPerformed(ActionEvent e) {
                 crypto = new Trithemius();
-                informationPanel.setCipherName("Trithemius");
+                informationPanel.setCryptoSystemName("Trithemius");
             }
         }));
         menu.addSeparator();
@@ -89,7 +89,7 @@ public class CryptManager {
             @Override
             public void actionPerformed(ActionEvent e) {
                 crypto = new Gamma();
-                informationPanel.setCipherName("Gamma");
+                informationPanel.setCryptoSystemName("Gamma");
             }
         }));
         menu.addSeparator();
@@ -97,7 +97,7 @@ public class CryptManager {
             @Override
             public void actionPerformed(ActionEvent e) {
                 crypto = new DES();
-                informationPanel.setCipherName("DES");
+                informationPanel.setCryptoSystemName("DES");
             }
         }));
         menu.addSeparator();
@@ -105,7 +105,7 @@ public class CryptManager {
             @Override
             public void actionPerformed(ActionEvent e) {
                 crypto = new TripleDES();
-                informationPanel.setCipherName("Triple DES");
+                informationPanel.setCryptoSystemName("Triple DES");
             }
         }));
         menu.addSeparator();
@@ -113,7 +113,7 @@ public class CryptManager {
             @Override
             public void actionPerformed(ActionEvent e) {
                 crypto = new AES();
-                informationPanel.setCipherName("AES");
+                informationPanel.setCryptoSystemName("AES");
             }
         }));
     }
@@ -127,12 +127,12 @@ public class CryptManager {
                     Editor editor = tabbedEditor.getSelectedEditor();
                     String text = new String();
                     try {
-                        text = listToString(crypto.decrypt(toList(editor.getTextArea().getText()), toList(keyField.getText())));
-                        log.toLog(DECRYPTED_DATA, informationPanel.getCipherName() + "\t" + informationPanel.getCharsInfo(), editor.getPath().toString());
+                        text = listToString(crypto.decrypt(toList(editor.getInputTextArea().getText()), toList(keyField.getText())));
                     } catch (BadPaddingException ex) {
                         text = wrongKey(editor);
                     }
-                    editor.getResult().setText(text);
+                    editor.getOutputTextArea().setText(text);
+                    toInform(DECRYPTED_DATA, editor);
                 }
             }
         });
@@ -144,15 +144,20 @@ public class CryptManager {
                     Editor editor = tabbedEditor.getSelectedEditor();
                     String text = null;
                     try {
-                        text = listToString(crypto.encrypt(toList(editor.getTextArea().getText()), toList(keyField.getText())));
-                        log.toLog(ENCRYPTED_DATA, informationPanel.getCipherName() + "\t" + informationPanel.getCharsInfo(), editor.getPath().toString());
+                        text = listToString(crypto.encrypt(toList(editor.getInputTextArea().getText()), toList(keyField.getText())));
                     } catch (BadPaddingException ex) {
                         text = wrongKey(editor);
                     }
-                    editor.getResult().setText(text);
+                    editor.getOutputTextArea().setText(text);
+                    toInform(ENCRYPTED_DATA, editor);
                 }
             }
         });
+    }
+
+    private void toInform(String decryptedData, Editor editor) {
+        informationPanel.setCharsInfo(editor.getInputCharsSize(), editor.getOutputCharsSize());
+        log.toLog(DECRYPTED_DATA, informationPanel.getCipherName() + "\t" + informationPanel.getCharsInfo(), editor.getPath().toString());
     }
 
     private String wrongKey(Editor editor) {

@@ -15,7 +15,7 @@ public class TabbedEditors extends JTabbedPane {
     public Editor add(Path path, String string) {
         Editor editor = new Editor(path);
         editor.setMinimumSize(new Dimension(200,200));
-        editor.getTextArea().setText(string);
+        editor.getInputTextArea().setText(string);
         if (notExist(path)) return (Editor) super.add(path.getFileName().toString(), editor);
         return null;
     }
