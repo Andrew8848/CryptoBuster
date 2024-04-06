@@ -4,6 +4,7 @@ import org.cryptobuster.cryptography.Crypto;
 import org.cryptobuster.cryptography.CryptoFromLib;
 
 import javax.crypto.*;
+import javax.sound.sampled.AudioFormat;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
@@ -15,10 +16,10 @@ public class TripleDES extends CryptoFromLib implements Crypto {
     }
 
     @Override
-    public List<Character> encrypt(List<Character> data, List<Character> key) throws BadPaddingException {
-        String encrypted = null;
+    public byte[] encrypt(byte[] data, byte[] key) throws BadPaddingException {
+        byte[] encrypted;
         try {
-            encrypted = encrypt(getCipherTransformation(), charsToString(data), getKeyFromPassword(charToPrimitiveChar(key)), generateIv(toByte(key)));
+            encrypted = encrypt(getCipherTransformation(), data, getKeyFromPassword(toChars(key)), generateIv(key));
         } catch (NoSuchPaddingException e) {
             throw new RuntimeException(e);
         } catch (NoSuchAlgorithmException e) {
@@ -32,14 +33,14 @@ public class TripleDES extends CryptoFromLib implements Crypto {
         } catch (InvalidKeySpecException e) {
             throw new RuntimeException(e);
         }
-        return stringToChars(encrypted);
+        return encrypted;
     }
 
     @Override
-    public List<Character> decrypt(List<Character> data, List<Character> key) throws BadPaddingException {
-        String encrypted = null;
+    public byte[] decrypt(byte[] data, byte[] key) throws BadPaddingException {
+        byte[] encrypted;
         try {
-            encrypted = decrypt(getCipherTransformation(), charsToString(data), getKeyFromPassword(charToPrimitiveChar(key)), generateIv(toByte(key)));
+            encrypted = decrypt(getCipherTransformation(), data, getKeyFromPassword(toChars(key)), generateIv(key));
         } catch (NoSuchPaddingException e) {
             throw new RuntimeException(e);
         } catch (NoSuchAlgorithmException e) {
@@ -53,6 +54,6 @@ public class TripleDES extends CryptoFromLib implements Crypto {
         } catch (InvalidKeySpecException e) {
             throw new RuntimeException(e);
         }
-        return stringToChars(encrypted);
+        return encrypted;
     }
 }

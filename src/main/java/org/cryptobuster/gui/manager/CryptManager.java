@@ -1,5 +1,6 @@
 package org.cryptobuster.gui.manager;
 
+import org.cryptobuster.cryptography.AlphabetHandler;
 import org.cryptobuster.cryptography.Crypto;
 import org.cryptobuster.cryptography.caesar.*;
 import org.cryptobuster.gui.MainFrame;
@@ -14,10 +15,8 @@ import javax.crypto.BadPaddingException;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 
 public class CryptManager {
@@ -25,6 +24,10 @@ public class CryptManager {
     public static final String ENCRYPTED_DATA = "ENCRYPTED_DATA";
     public static final String DECRYPTED_DATA = "DECRYPTED_DATA";
     public static final String WRONG_KEY = "WRONG KEY";
+
+    public static final String WRONG_INPUT_ARGUMENT = "WRONG INPUT ARGUMENT";
+
+    public static final Charset encoder = StandardCharsets.UTF_8;
 
 
     private static CryptManager instance;
@@ -69,19 +72,33 @@ public class CryptManager {
     }
 
     private void initMenuCipherItems(JMenu menu) {
-        menu.add(new MenuItem("Caesar", new AbstractAction() {
+        menu.add(new MenuItem("Caesar EN", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                crypto = new Caesar();
-                informationPanel.setCryptoSystemName("Caesar");
+                crypto = new Caesar(AlphabetHandler.EN);
+                informationPanel.setCryptoSystemName("Caesar EN");
+            }
+        }));
+        menu.add(new MenuItem("Caesar UA", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                crypto = new Caesar(AlphabetHandler.UA);
+                informationPanel.setCryptoSystemName("Caesar UAr");
             }
         }));
         menu.addSeparator();
-        menu.add(new MenuItem("Trithemius", new AbstractAction() {
+        menu.add(new MenuItem("Trithemius EN", new AbstractAction() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                crypto = new Trithemius();
-                informationPanel.setCryptoSystemName("Trithemius");
+                crypto = new Trithemius(AlphabetHandler.EN);
+                informationPanel.setCryptoSystemName("Trithemius EN");
+            }
+        }));
+        menu.add(new MenuItem("Trithemius UA", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                crypto = new Trithemius(AlphabetHandler.UA);
+                informationPanel.setCryptoSystemName("Trithemius UA");
             }
         }));
         menu.addSeparator();
@@ -125,14 +142,18 @@ public class CryptManager {
             public void actionPerformed(ActionEvent e) {
                 if(keyAndTabIsExist()){
                     Editor editor = tabbedEditor.getSelectedEditor();
-                    String text = new String();
                     try {
-                        text = listToString(crypto.decrypt(toList(editor.getInputTextArea().getText()), toList(keyField.getText())));
+                        byte[] data = crypto.decrypt(editor.getInputData(), keyField.getText().getBytes(encoder));
+//                        String text = listToString(crypto.decrypt(editor.getInputData(), keyField.getText().getBytes(encoder)));
+//                        editor.getOutputTextArea().setText(text);
+                        editor.setOutputData(data);
+                        toInform(DECRYPTED_DATA, editor);
                     } catch (BadPaddingException ex) {
-                        text = wrongKey(editor);
+                        editor.getOutputTextArea().setText(wrongKey(editor));
+                    } catch (IllegalArgumentException ex){
+                        toInformTheWrongArgument(editor);
                     }
-                    editor.getOutputTextArea().setText(text);
-                    toInform(DECRYPTED_DATA, editor);
+
                 }
             }
         });
@@ -142,27 +163,35 @@ public class CryptManager {
             public void actionPerformed(ActionEvent e) {
                 if(keyAndTabIsExist()){
                     Editor editor = tabbedEditor.getSelectedEditor();
-                    String text = null;
                     try {
-                        text = listToString(crypto.encrypt(toList(editor.getInputTextArea().getText()), toList(keyField.getText())));
+//                        String text = listToString(crypto.encrypt(editor.getInputData(), keyField.getText().getBytes(encoder)));
+//                        editor.getOutputTextArea().setText(text);
+                        byte[] data = crypto.encrypt(editor.getInputData(), keyField.getText().getBytes(encoder));
+                        editor.setOutputData(data);
+                        toInform(ENCRYPTED_DATA, editor);
                     } catch (BadPaddingException ex) {
-                        text = wrongKey(editor);
+                        editor.getOutputTextArea().setText(wrongKey(editor));
+                    } catch (IllegalArgumentException ex){
+                        toInformTheWrongArgument(editor);
                     }
-                    editor.getOutputTextArea().setText(text);
-                    toInform(ENCRYPTED_DATA, editor);
+
                 }
             }
         });
     }
 
+    private void toInformTheWrongArgument(Editor editor) {
+        log.toLog(WRONG_INPUT_ARGUMENT, informationPanel.getCryptoSystemName() + "\t" + informationPanel.getCharsInfo(), editor.getPath().toString());
+    }
+
     private void toInform(String decryptedData, Editor editor) {
         informationPanel.setCharsInfo(editor.getInputCharsSize(), editor.getOutputCharsSize());
-        log.toLog(DECRYPTED_DATA, informationPanel.getCipherName() + "\t" + informationPanel.getCharsInfo(), editor.getPath().toString());
+        log.toLog(DECRYPTED_DATA, informationPanel.getCryptoSystemName() + "\t" + informationPanel.getCharsInfo(), editor.getPath().toString());
     }
 
     private String wrongKey(Editor editor) {
         String text = "";
-        log.toLog(WRONG_KEY, informationPanel.getCipherName() + "\t" + informationPanel.getCharsInfo(), editor.getPath().toString());
+        log.toLog(WRONG_KEY, informationPanel.getCryptoSystemName() + "\t" + informationPanel.getCharsInfo(), editor.getPath().toString());
         return text;
     }
 
@@ -182,15 +211,8 @@ public class CryptManager {
         return true;
     }
 
-    private String listToString(List<Character> chars){
-        return chars.stream().map(String::valueOf).collect(Collectors.joining());
+    private String listToString(byte[] chars){
+        return new String(chars, encoder);
     }
 
-    private static java.util.List<Character> toList(String str){
-        return toList(str.toCharArray());
-    }
-
-    private static List<Character> toList(char[] chars){
-        return IntStream.range(0, chars.length).mapToObj(i -> chars[i]).toList();
-    }
 }

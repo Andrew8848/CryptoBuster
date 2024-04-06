@@ -10,8 +10,8 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
 public interface Crypto {
-    public List<Character> encrypt(List<Character> data, List<Character> key) throws BadPaddingException;
+    public byte[] encrypt(byte[] data, byte[] key) throws BadPaddingException, IllegalArgumentException;
 
-    public List<Character> decrypt(List<Character> data, List<Character> key) throws BadPaddingException;
+    public byte[] decrypt(byte[] data, byte[] key) throws BadPaddingException, IllegalArgumentException;
 
 }

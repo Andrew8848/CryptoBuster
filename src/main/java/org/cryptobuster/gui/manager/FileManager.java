@@ -160,69 +160,89 @@ public class FileManager {
         if(editor != null){
             Path path = editor.getPath();
             saveFile(path, editor);
+            log.toLog(SAVE, "successfully saved the " + path.getFileName().toString() + " file", editor.getPath().toString());
         } else{
             this.alertDialog.open("WARNING", "it is impossible to save files because there are no open windows");
         }
     }
 
     public void saveAll(){
-        Editor[] editors = this.tabEditorPanel.getTabbedEditors().getAllTabs();
+        Editor editorChecker = this.tabEditorPanel.getTabbedEditors().getSelectedEditor();
+        if(editorChecker != null){
+            Editor[] editors = this.tabEditorPanel.getTabbedEditors().getAllTabs();
 
-        Arrays.stream(editors).forEach(editor -> {
-            Path path = editor.getPath();
-            saveFile(path, editor);
-        });
-
+            Arrays.stream(editors).forEach(editor -> {
+                Path path = editor.getPath();
+                saveFile(path, editor);
+                log.toLog(SAVE, "successfully saved the " + path.getFileName().toString() + " file", editor.getPath().toString());
+            });
+        } else{
+            this.alertDialog.open("WARNING", "it is impossible to save files because there are no open windows");
+        }
     }
 
     private void saveFile(Path path, Editor editor) {
-        this.alertDialog.open("WARNING", "The " + path.getFileName().toString() + " can destroy the source data after saving", new AbstractAction() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-            try {
-                if(Files.notExists(path)) Files.createFile(editor.getPath());
-                Files.writeString(editor.getPath(), editor.getInputTextArea().getText(), encoder);
-                log.toLog(SAVE, "successfully saved the " + path.getFileName().toString() + " file", editor.getPath().toString());
-            } catch (IOException ex) {
-                log.toLog(ERROR_SAVING_FILE, "possible the problem is include with permission", editor.getPath().toString());
-            }
-            }
-        });
+        if (Files.exists(path)){
+            this.alertDialog.open("WARNING", "The " + path.getFileName().toString() + " can destroy the source data after saving", new AbstractAction() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    toWrite(path, editor);
+                }
+            });
+        }else {
+            toWrite(path, editor);
+        }
+    }
+
+    private void toWrite(Path path, Editor editor) {
+        try {
+            if(Files.notExists(path)) Files.createFile(path);
+            Files.write(path, editor.getInputData());
+        } catch (IOException ex) {
+            log.toLog(ERROR_SAVING_FILE, "possible the problem is include with permission", editor.getPath().toString());
+        }
     }
 
     public void saveAs(){
-        JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView());
-        fileChooser.setCurrentDirectory(this.filePanel.getTree().getLastLocation().toFile());
-        fileChooser.setSelectedFile(new File(this.filePanel.getTree().getSelectionPath().getLastPathComponent().toString()));
-        if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION){
-            Path path = getPath(fileChooser);
-            try {
-                if(Files.notExists(path)) Files.createFile(path);
-                Files.writeString(path, this.tabEditorPanel.getTabbedEditors().getSelectedEditor().getInputTextArea().getText());
+        Editor editorChecker = this.tabEditorPanel.getTabbedEditors().getSelectedEditor();
+        if(editorChecker != null){
+            JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView());
+            fileChooser.setCurrentDirectory(this.filePanel.getTree().getLastLocation().toFile());
+
+            fileChooser.setSelectedFile(new File(this.tabEditorPanel.getTabbedEditors().getSelectedEditor().getPath().getFileName().toString()));
+
+            if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION){
+                Path path = getPath(fileChooser);
+                saveFile(path, this.tabEditorPanel.getTabbedEditors().getSelectedEditor());
                 setRootPath(path.getParent());
                 this.log.toLog(SAVE_AS, fileChooser.getSelectedFile().getName(), path.toString());
-            } catch (IOException e) {
-                log.toLog(ERROR_SAVING_FILE, "possible the problem is include with permission", path.toString());
-            }
-        }
 
+            }
+        } else{
+            this.alertDialog.open("WARNING", "it is impossible to save files because there are no open windows");
+        }
     }
 
 
     public void export(){
-        JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView());
-        fileChooser.setCurrentDirectory(this.filePanel.getTree().getLastLocation().toFile());
-        fileChooser.setFileFilter(setFilter("txt", "txt files (*.txt)"));
-        if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION){
-            Path path = getPath(fileChooser);
-            try {
-                if(Files.notExists(path)) Files.createFile(path);
-                Files.writeString(path, this.tabEditorPanel.getTabbedEditors().getSelectedEditor().getOutputTextArea().getText());
-                setRootPath(path.getParent());
-                this.log.toLog(SAVE_AS, fileChooser.getSelectedFile().getName(), path.toString());
-            } catch (IOException e) {
-                log.toLog(ERROR_SAVING_FILE, "possible the problem is include with permission", path.toString());
+        Editor editorChecker = this.tabEditorPanel.getTabbedEditors().getSelectedEditor();
+        if(editorChecker != null){
+            JFileChooser fileChooser = new JFileChooser(FileSystemView.getFileSystemView());
+            fileChooser.setCurrentDirectory(this.filePanel.getTree().getLastLocation().toFile());
+            fileChooser.setFileFilter(setFilter("txt", "txt files (*.txt)"));
+            if (fileChooser.showSaveDialog(null) == JFileChooser.APPROVE_OPTION){
+                Path path = getPath(fileChooser);
+                try {
+                    if(Files.notExists(path)) Files.createFile(path);
+                    Files.write(path, this.tabEditorPanel.getTabbedEditors().getSelectedEditor().getOutputData());
+                    setRootPath(path.getParent());
+                    this.log.toLog(SAVE_AS, fileChooser.getSelectedFile().getName(), path.toString());
+                } catch (IOException e) {
+                    log.toLog(ERROR_SAVING_FILE, "possible the problem is include with permission", path.toString());
+                }
             }
+        } else{
+            this.alertDialog.open("WARNING", "it is impossible to export because there are no open windows");
         }
     }
 
@@ -420,7 +440,7 @@ public class FileManager {
     }
 
     private void createTab(Path path) throws IOException {
-        this.tabEditorPanel.add(path, Files.readString(path, encoder));
+        this.tabEditorPanel.add(path, Files.readAllBytes(path), encoder);
     }
 
     private void setRootPath(Path path) {

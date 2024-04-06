@@ -7,6 +7,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.event.*;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 
 @Getter
@@ -31,11 +32,11 @@ public class TabEditorPanel extends JPanel {
         init();
     }
 
-    public void add(Path path, String string){
+    public void add(Path path, byte[] data, Charset encoder){
 
         if(this.tabbedEditors.tabIsNull()) setTabbedEditors();
 
-        this.tabbedEditors.add(path, string);
+        this.tabbedEditors.add(path, data, encoder);
 
         int index = this.tabbedEditors.indexOfPath(path);
 

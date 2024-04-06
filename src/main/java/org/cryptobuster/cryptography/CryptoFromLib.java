@@ -30,7 +30,7 @@ public abstract class CryptoFromLib {
 
     public static final int AES_KEY_LENGTH = 256;
     public static final int DES_KEY_LENGTH = 64;
-    public static final int DESede_KEY_LENGTH = DES_KEY_LENGTH;
+    public static final int DESede_KEY_LENGTH = 192;
 
 
     private static final String KEY_FACTORY_ALGORITHM = "PBKDF2WithHmacSHA256";
@@ -44,7 +44,7 @@ public abstract class CryptoFromLib {
     private String algorithm;
     private String cipherTransformation;
 
-    private static final Charset encoder = StandardCharsets.ISO_8859_1;
+    private static final Charset encoder = StandardCharsets.UTF_8;
 
     public CryptoFromLib(String algorithm, int keyLength, int ivLength) {
         this.algorithm = algorithm;
@@ -72,41 +72,23 @@ public abstract class CryptoFromLib {
         return new IvParameterSpec(iv);
     }
 
-    public static String encrypt(String algorithm, String input, SecretKey key, IvParameterSpec iv) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+    public static byte[] encrypt(String algorithm, byte[] input, SecretKey key, IvParameterSpec iv) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance(algorithm);
         cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-        byte[] cipherText = cipher.doFinal(input.getBytes());
+        byte[] cipherText = cipher.doFinal(input);
         return Base64.getEncoder()
-                .encodeToString(cipherText);
+                .encode(cipherText);
     }
 
-    public static String decrypt(String algorithm, String cipherText, SecretKey key, IvParameterSpec iv) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
+    public static byte[] decrypt(String algorithm, byte[] cipherText, SecretKey key, IvParameterSpec iv) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException, InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
         Cipher cipher = Cipher.getInstance(algorithm);
         cipher.init(Cipher.DECRYPT_MODE, key, iv);
-        byte[] plainText = cipher.doFinal(Base64.getDecoder()
-                .decode(cipherText));
-        return new String(plainText);
+        byte[] plainText = cipher.doFinal(Base64.getDecoder().decode(cipherText));
+        return plainText;
     }
 
-    public static List<Character> stringToChars(char[] chars){
-        return IntStream.range(0, chars.length).mapToObj(i -> chars[i]).toList();
+    public static char[] toChars(byte[] bytes){
+        return new String(bytes, StandardCharsets.UTF_8).toCharArray();
     }
-
-    public static List<Character> stringToChars(String str){
-        return str.chars().mapToObj(ch -> (char) ch).toList();
-    }
-
-    public static char[] charToPrimitiveChar(List<Character> chars){
-        return chars.stream().map(String::valueOf).collect(Collectors.joining()).toCharArray();
-    }
-
-    public static String charsToString(List<Character> list){
-        return list.stream().map(String::valueOf).collect(Collectors.joining());
-    }
-
-    public byte[] toByte(List<Character> chars){
-        return chars.stream().map(String::valueOf).collect(Collectors.joining()).getBytes();
-    }
-
 
 }

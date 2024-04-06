@@ -1,8 +1,11 @@
 package org.cryptobuster.cryptography.caesar;
 
 import org.cryptobuster.cryptography.AlphabetHandler;
+import org.cryptobuster.cryptography.ArrayUtil;
 import org.cryptobuster.cryptography.Crypto;
 
+import javax.crypto.BadPaddingException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,16 +17,28 @@ public class Trithemius implements Crypto {
 
     private final List<Character> alphabet;
 
-    public Trithemius() {
-        this.alphabet = new AlphabetHandler(AlphabetHandler.EN).getAlphabet();
+    public Trithemius(String languageAlphabet) {
+        this.alphabet = new AlphabetHandler(languageAlphabet).getAlphabet();
     }
 
     @Override
+    public byte[] encrypt(byte[] data, byte[] key) {
+        List<Character> outputData = rotateIncrementAndGetChar(ArrayUtil.toChars(data), getShiftedKey(ArrayUtil.toChars(key)), this.alphabet);
+        return ArrayUtil.charsToString(outputData).getBytes(StandardCharsets.UTF_8);
+    }
+
+    @Override
+    public byte[] decrypt(byte[] data, byte[] key) {
+        List<Character> reversedAlphabet = new ArrayList<>(this.alphabet);
+        Collections.reverse(reversedAlphabet);
+        List<Character> outputData = rotateIncrementAndGetChar(ArrayUtil.toChars(data), getShiftedKey(ArrayUtil.toChars(key)), reversedAlphabet);
+        return ArrayUtil.charsToString(outputData).getBytes(StandardCharsets.UTF_8);
+    }
+
     public List<Character> encrypt(List<Character> data, List<Character> key) {
         return rotateIncrementAndGetChar(data, getShiftedKey(key), this.alphabet);
     }
 
-    @Override
     public List<Character> decrypt(List<Character> data, List<Character> key) {
         List<Character> reversedAlphabet = new ArrayList<>(this.alphabet);
         Collections.reverse(reversedAlphabet);
@@ -45,4 +60,6 @@ public class Trithemius implements Crypto {
     private int getShiftedKey(List<Character> key) {
         return key.stream().mapToInt(Character::charValue).sum();
     }
+
+
 }

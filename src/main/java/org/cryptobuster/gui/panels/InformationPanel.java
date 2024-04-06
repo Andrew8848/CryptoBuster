@@ -23,8 +23,11 @@ public class InformationPanel extends JPanel {
     private void init() {
         setBackground(Color.white);
         setLayout(new BorderLayout());
-        this.cryptoSystem = new JLabel(CRYPTOSYSTEM_STR);
-        this.chars = new JLabel(CHAR_INPUT_STR);
+        this.cryptoSystem = new JLabel();
+        this.chars = new JLabel();
+
+        setCryptoSystemName("None");
+        setCharsInfo(0,0);
 
         add(this.cryptoSystem, BorderLayout.LINE_START);
         add(this.chars, BorderLayout.LINE_END);
@@ -35,15 +38,15 @@ public class InformationPanel extends JPanel {
     }
 
     public void setCharsInfo(long inputChars, long outputChars) {
-            this.chars.setText(CHAR_INPUT_STR + inputChars + "      " + CHAR_OUTPUT_STR + outputChars + "    ");
+            this.chars.setText(CHAR_INPUT_STR + inputChars + "  " + CHAR_OUTPUT_STR + outputChars + "   ");
     }
 
-    public String getCipherName() {
+    public String getCryptoSystemName() {
         return this.cryptoSystem.getText();
     }
 
     public void setCryptoSystemName(String cryptoSystem) {
-        this.cryptoSystem.setText( "        " + CRYPTOSYSTEM_STR + cryptoSystem);
+        this.cryptoSystem.setText( "    " + CRYPTOSYSTEM_STR + cryptoSystem);
     }
 
 }

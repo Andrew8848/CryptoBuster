@@ -3,6 +3,7 @@ package org.cryptobuster.gui.panels;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Arrays;
 
@@ -12,10 +13,10 @@ public class TabbedEditors extends JTabbedPane {
     public TabbedEditors() {
     }
 
-    public Editor add(Path path, String string) {
-        Editor editor = new Editor(path);
-        editor.setMinimumSize(new Dimension(200,200));
-        editor.getInputTextArea().setText(string);
+    public Editor add(Path path, byte[] data, Charset encoder) {
+        Editor editor = new Editor(path, encoder);
+        editor.setInputData(data);
+//        editor.setDataInInputTextArea();
         if (notExist(path)) return (Editor) super.add(path.getFileName().toString(), editor);
         return null;
     }

@@ -1,6 +1,7 @@
 package org.cryptobuster.cryptography;
 
 import lombok.Getter;
+import org.cryptobuster.gui.dialog.about.DialogAbout;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -9,6 +10,7 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 public class AlphabetHandler extends DefaultHandler {
@@ -16,7 +18,7 @@ public class AlphabetHandler extends DefaultHandler {
 
     public static final String EN = "en";
     public static final String UA = "ua";
-    private static final String PATH = "src/main/resources/Caesar/alphabets.xml";
+    private static final InputStream PATH = DialogAbout.class.getClassLoader().getResourceAsStream("alphabets.xml");
 
     private String language;
 
@@ -47,7 +49,7 @@ public class AlphabetHandler extends DefaultHandler {
         try {
             SAXParser parser = parserFactory.newSAXParser();
             handler = this;
-            parser.parse(new File(PATH), handler);
+            parser.parse(PATH, handler);
         } catch (ParserConfigurationException | SAXException | IOException e) {
             throw new RuntimeException(e);
         }
