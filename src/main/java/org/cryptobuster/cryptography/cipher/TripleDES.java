@@ -1,24 +1,22 @@
-package org.cryptobuster.cryptography.caesar;
+package org.cryptobuster.cryptography.cipher;
 
 import org.cryptobuster.cryptography.Crypto;
 import org.cryptobuster.cryptography.CryptoFromLib;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
+import javax.crypto.*;
+import javax.sound.sampled.AudioFormat;
+import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 
-public class AES extends CryptoFromLib implements Crypto {
-    public AES() {
-        super("AES", CryptoFromLib.AES_KEY_LENGTH, CryptoFromLib.AES_IV_LENGTH);
+public class TripleDES extends CryptoFromLib implements Crypto {
+
+    public TripleDES() {
+        super("DESede", CryptoFromLib.DESede_KEY_LENGTH, CryptoFromLib.DESede_IV_LENGTH);
     }
 
     @Override
-    public byte[] encrypt(byte[] data, byte[] key) throws BadPaddingException, IllegalArgumentException {
+    public byte[] encrypt(byte[] data, byte[] key) throws BadPaddingException {
         byte[] encrypted;
         try {
             encrypted = encrypt(getCipherTransformation(), data, getKeyFromPassword(toChars(key)), generateIv(key));
@@ -30,7 +28,7 @@ public class AES extends CryptoFromLib implements Crypto {
             throw new RuntimeException(e);
         } catch (InvalidKeyException e) {
             throw new RuntimeException(e);
-        } catch (IllegalBlockSizeException e) {
+        }  catch (IllegalBlockSizeException e) {
             throw new RuntimeException(e);
         } catch (InvalidKeySpecException e) {
             throw new RuntimeException(e);
@@ -39,7 +37,7 @@ public class AES extends CryptoFromLib implements Crypto {
     }
 
     @Override
-    public byte[] decrypt(byte[] data, byte[] key) throws BadPaddingException, IllegalArgumentException{
+    public byte[] decrypt(byte[] data, byte[] key) throws BadPaddingException {
         byte[] encrypted;
         try {
             encrypted = decrypt(getCipherTransformation(), data, getKeyFromPassword(toChars(key)), generateIv(key));
@@ -51,7 +49,7 @@ public class AES extends CryptoFromLib implements Crypto {
             throw new RuntimeException(e);
         } catch (InvalidKeyException e) {
             throw new RuntimeException(e);
-        }  catch (IllegalBlockSizeException e) {
+        } catch (IllegalBlockSizeException e) {
             throw new RuntimeException(e);
         } catch (InvalidKeySpecException e) {
             throw new RuntimeException(e);

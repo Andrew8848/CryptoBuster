@@ -1,6 +1,5 @@
-package org.cryptobuster.cryptography.caesar;
+package org.cryptobuster.cryptography.cipher;
 
-import org.cryptobuster.cryptography.AlphabetHandler;
 import org.cryptobuster.cryptography.ArrayUtil;
 import org.cryptobuster.cryptography.Crypto;
 import org.junit.jupiter.api.Test;
@@ -11,12 +10,14 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class CaesarTestEN extends CipherTest{
+public class DESTest extends CipherTest{
+
 
     @Test
     @Override
     public void crypt() throws BadPaddingException {
-        Crypto crypto = new Caesar(AlphabetHandler.EN);
+        Crypto crypto = new DES();
+
         byte[] encryptResult = crypto.encrypt(getData().getBytes(StandardCharsets.UTF_8), getKey().getBytes(StandardCharsets.UTF_8));
         String encryptedText = ArrayUtil.toChars(encryptResult).stream().map(String::valueOf).collect(Collectors.joining());
 
@@ -25,6 +26,4 @@ class CaesarTestEN extends CipherTest{
 
         assertEquals(decryptedText, getData());
     }
-
-
 }

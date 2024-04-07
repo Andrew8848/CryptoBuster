@@ -2,8 +2,11 @@ package org.cryptobuster.gui.manager;
 
 import org.cryptobuster.cryptography.AlphabetHandler;
 import org.cryptobuster.cryptography.Crypto;
-import org.cryptobuster.cryptography.caesar.*;
+import org.cryptobuster.cryptography.cipher.*;
+import org.cryptobuster.cryptography.util.SecretKeyGenerator;
 import org.cryptobuster.gui.MainFrame;
+import org.cryptobuster.gui.childwindows.StrongCombinationWindow;
+import org.cryptobuster.gui.childwindows.TrithemiusKeyFinder;
 import org.cryptobuster.gui.component.ActionLog;
 import org.cryptobuster.gui.component.MenuItem;
 import org.cryptobuster.gui.dialog.alert.AlertDialog;
@@ -12,6 +15,7 @@ import org.cryptobuster.gui.panels.InformationPanel;
 import org.cryptobuster.gui.panels.TabbedEditors;
 
 import javax.crypto.BadPaddingException;
+import javax.crypto.SecretKey;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -27,6 +31,9 @@ public class CryptManager {
 
     public static final String WRONG_INPUT_ARGUMENT = "WRONG INPUT ARGUMENT";
 
+    public static final String KEY_GENERATE = "GENERATED KEY";
+
+
     public static final Charset encoder = StandardCharsets.UTF_8;
 
 
@@ -37,6 +44,8 @@ public class CryptManager {
     }
 
     private JMenu menuCipher;
+
+    private JMenu menuTools;
 
     private TabbedEditors tabbedEditor;
 
@@ -52,22 +61,31 @@ public class CryptManager {
 
     private AlertDialog alertDialog;
 
+    private StrongCombinationWindow strongCombinationWindow;
+
+    private TrithemiusKeyFinder trithemiusKeyFinder;
+
     private Crypto crypto;
 
 
-    private CryptManager(MainFrame own) {
-        this.menuCipher = own.getMenuCipher();
+    private CryptManager(MainFrame owner) {
+        this.menuCipher = owner.getMenuCipher();
+        this.menuTools = owner.getMenuTools();
 
-        this.tabbedEditor = own.getCryptPanel().getFileManagementPanel().getTabEditorPanel().getTabbedEditors();
-        this.keyField = own.getCryptPanel().getControlPanel().getKeyField();
-        this.decrypt = own.getCryptPanel().getControlPanel().getDecrypt();
-        this.encrypt = own.getCryptPanel().getControlPanel().getEncrypt();
-        this.log = own.getCryptPanel().getControlPanel().getLog();
-        this.informationPanel = own.getInformationPanel();
-        this.alertDialog = new AlertDialog(own);
+        this.tabbedEditor = owner.getCryptPanel().getFileManagementPanel().getTabEditorPanel().getTabbedEditors();
+        this.keyField = owner.getCryptPanel().getControlPanel().getKeyField();
+        this.decrypt = owner.getCryptPanel().getControlPanel().getDecrypt();
+        this.encrypt = owner.getCryptPanel().getControlPanel().getEncrypt();
+        this.log = owner.getCryptPanel().getControlPanel().getLog();
+        this.informationPanel = owner.getInformationPanel();
+        this.alertDialog = new AlertDialog(owner);
+        this.strongCombinationWindow = new StrongCombinationWindow(owner);
+        this.trithemiusKeyFinder = new TrithemiusKeyFinder(owner);
+
         log.setCaretColor(Color.BLUE);
 
         initMenuCipherItems(this.menuCipher);
+        initToolsMenu(this.menuTools);
         initListener();
     }
 
@@ -83,7 +101,7 @@ public class CryptManager {
             @Override
             public void actionPerformed(ActionEvent e) {
                 crypto = new Caesar(AlphabetHandler.UA);
-                informationPanel.setCryptoSystemName("Caesar UAr");
+                informationPanel.setCryptoSystemName("Caesar UA");
             }
         }));
         menu.addSeparator();
@@ -135,6 +153,87 @@ public class CryptManager {
         }));
     }
 
+    private void initToolsMenu(JMenu menu){
+        JMenu attackerMenu = initAttackerMenu("Attacker Tools");
+        JMenu keyGeneratorMenu = initKeyGeneratorMenu("Key Generator");
+        menu.add(attackerMenu);
+        menu.add(keyGeneratorMenu);
+    }
+
+    private JMenu initAttackerMenu(String name) {
+        JMenu menu = new JMenu(name);
+
+        menu.add(new MenuItem("Caesar Strong Combination", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                strongCombinationWindow.open();
+            }
+        }));
+        menu.add(new MenuItem("Trithemius Key Finder", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                trithemiusKeyFinder.open();
+            }
+        }));
+
+
+        return menu;
+    }
+
+    private JMenu initKeyGeneratorMenu(String name) {
+        JMenu menu = new JMenu(name);
+
+        menu.add(new MenuItem("Generate Key 2048", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                keyGenerator(2048);
+            }
+        }));
+
+        menu.add(new MenuItem("Generate Key 1024", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                keyGenerator(1024);
+            }
+        }));
+
+        menu.add(new MenuItem("Generate Key 512", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                keyGenerator(512);
+            }
+        }));
+
+        menu.add(new MenuItem("Generate Key 256", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                keyGenerator(256);
+            }
+        }));
+
+        menu.add(new MenuItem("Generate Key 128", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                keyGenerator(128);
+            }
+        }));
+
+        menu.add(new MenuItem("Generate Key 64", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                keyGenerator(64);
+            }
+        }));
+
+        return menu;
+    }
+
+    private void keyGenerator(int length) {
+        byte[] key = SecretKeyGenerator.generateKey(length);
+        keyField.setText(new String(key, encoder));
+        this.log.toLog(KEY_GENERATE, new String(key, encoder), "");
+   }
+
     private void initListener() {
 
         this.decrypt.addActionListener(new AbstractAction() {
@@ -144,8 +243,6 @@ public class CryptManager {
                     Editor editor = tabbedEditor.getSelectedEditor();
                     try {
                         byte[] data = crypto.decrypt(editor.getInputData(), keyField.getText().getBytes(encoder));
-//                        String text = listToString(crypto.decrypt(editor.getInputData(), keyField.getText().getBytes(encoder)));
-//                        editor.getOutputTextArea().setText(text);
                         editor.setOutputData(data);
                         toInform(DECRYPTED_DATA, editor);
                     } catch (BadPaddingException ex) {
@@ -164,8 +261,6 @@ public class CryptManager {
                 if(keyAndTabIsExist()){
                     Editor editor = tabbedEditor.getSelectedEditor();
                     try {
-//                        String text = listToString(crypto.encrypt(editor.getInputData(), keyField.getText().getBytes(encoder)));
-//                        editor.getOutputTextArea().setText(text);
                         byte[] data = crypto.encrypt(editor.getInputData(), keyField.getText().getBytes(encoder));
                         editor.setOutputData(data);
                         toInform(ENCRYPTED_DATA, editor);

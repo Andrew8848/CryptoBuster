@@ -31,6 +31,8 @@ public class MainFrame extends JFrame {
 
     private JMenu menuCipher;
 
+    private JMenu menuTools;
+
     private JMenu menuMore;
 
     private CryptPanel cryptPanel;
@@ -48,6 +50,7 @@ public class MainFrame extends JFrame {
 
         this.menuFile = new JMenu("File");
         this.menuCipher = new JMenu("Cipher");
+        this.menuTools = new JMenu("Tools");
         this.menuMore = new JMenu("More");
 
         this.cryptPanel = CryptPanel.getInstance();
@@ -111,6 +114,7 @@ public class MainFrame extends JFrame {
         MenuBar mainMenuBar = MenuBar.getInstance();
         mainMenuBar.add(this.menuFile);
         mainMenuBar.add(this.menuCipher);
+        mainMenuBar.add(this.menuTools);
         mainMenuBar.add(setMenuMoreItems(this.menuMore));
         add(mainMenuBar, BorderLayout.NORTH);
     }

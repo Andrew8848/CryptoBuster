@@ -1,5 +1,6 @@
 package org.cryptobuster.cryptography;
 
+import lombok.Data;
 import lombok.Getter;
 import org.cryptobuster.gui.dialog.about.DialogAbout;
 import org.xml.sax.SAXException;
@@ -11,47 +12,28 @@ import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+@Data
 public class AlphabetHandler extends DefaultHandler {
-
 
     public static final String EN = "en";
     public static final String UA = "ua";
-    private static final InputStream PATH = DialogAbout.class.getClassLoader().getResourceAsStream("alphabets.xml");
 
-    private String language;
+    private static final Charset encoder = StandardCharsets.UTF_8;
 
-    private List<Character> data;
+    private static final char[] enAlphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890.,?!:;'\"‘’()[]–/".toCharArray();
+    private static final char[] uaAlphabet = "абвгґдеєжзиіїйклмнопрстуфхцчшщьюяАБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ1234567890.,?!:;'\"‘’()[]–/".toCharArray();
 
-    @Getter
-    private List<Character> alphabet;
-
-
-    public AlphabetHandler(String language) {
-        this.language = language;
-        getAlphabetFromXml();
+    public static char[] getEnAlphabet(){
+        return enAlphabet;
     }
 
-    @Override
-    public void characters(char[] ch, int start, int length) throws SAXException {
-        this.data = new String(ch, start, length).chars().mapToObj(element -> (char) element).toList();
+    public static char[] getUaAlphabet(){
+        return uaAlphabet;
     }
 
-    @Override
-    public void endElement(String uri, String localName, String qName) throws SAXException {
-        if(this.language.equals(qName)) this.alphabet = this.data;
-    }
 
-    private void getAlphabetFromXml() {
-        SAXParserFactory parserFactory = SAXParserFactory.newInstance();
-        AlphabetHandler handler;
-        try {
-            SAXParser parser = parserFactory.newSAXParser();
-            handler = this;
-            parser.parse(PATH, handler);
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

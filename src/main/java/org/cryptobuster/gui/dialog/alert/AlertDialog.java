@@ -11,9 +11,9 @@ public class AlertDialog {
 
     private static final Font FONT = new Font("Calibri", Font.PLAIN, 16);
 
-    private MainFrame owner;
+    private JFrame owner;
 
-    public AlertDialog(MainFrame owner) {
+    public AlertDialog(JFrame owner) {
         this.owner = owner;
     }
 

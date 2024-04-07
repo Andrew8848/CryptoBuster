@@ -103,7 +103,7 @@ public class FileManager {
             if(Files.notExists(path)) {
                 try {
                     Files.createFile(path);
-//                    setRootPath(path.getParent());
+                    setRootPath(path.getParent());
                     createTab(path);
                     this.log.toLog(CREATED_FILE, fileChooser.getSelectedFile().getName(), path.toString());
                 } catch (IOException e) {
@@ -236,7 +236,7 @@ public class FileManager {
                     if(Files.notExists(path)) Files.createFile(path);
                     Files.write(path, this.tabEditorPanel.getTabbedEditors().getSelectedEditor().getOutputData());
                     setRootPath(path.getParent());
-                    this.log.toLog(SAVE_AS, fileChooser.getSelectedFile().getName(), path.toString());
+                    this.log.toLog(EXPORT, fileChooser.getSelectedFile().getName(), path.toString());
                 } catch (IOException e) {
                     log.toLog(ERROR_SAVING_FILE, "possible the problem is include with permission", path.toString());
                 }

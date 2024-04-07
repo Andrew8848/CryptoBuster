@@ -1,4 +1,5 @@
-package org.cryptobuster.cryptography.caesar;
+package org.cryptobuster.cryptography.cipher;
+
 
 import lombok.Getter;
 import org.junit.jupiter.api.Test;
@@ -10,8 +11,6 @@ import java.util.stream.IntStream;
 public abstract class CipherTest {
 
     private String data = "Hello Test";
-//    private String data = "jjjjjjjjjjj";
-
     private String key = "key";
 
     public abstract void crypt() throws BadPaddingException;

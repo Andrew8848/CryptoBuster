@@ -1,4 +1,4 @@
-package org.cryptobuster.cryptography.caesar;
+package org.cryptobuster.cryptography.cipher;
 
 import org.cryptobuster.cryptography.ArrayUtil;
 import org.cryptobuster.cryptography.Crypto;
